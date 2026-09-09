@@ -3,7 +3,7 @@ import { ArtistConfig, TabType } from '../types/artist';
 
 interface HeroProps {
   config: ArtistConfig;
-  onSelectTab: (tab: TabType) => void;
+  onSelectTab?: (tab: TabType) => void;
   onPlayTrack?: (title: string, artist: string) => void;
   onUpdateConfig?: (config: ArtistConfig) => void;
 }
@@ -25,7 +25,10 @@ export const Hero: React.FC<HeroProps> = ({ config }) => {
     const playVideo = () => {
       if (videoEl && videoEl.paused) {
         videoEl.play().catch((err) => {
-          console.warn("Hero video autoplay notice (browser policy):", err);
+          console.warn(
+            'Hero video autoplay notice (browser policy):',
+            err
+          );
         });
       }
     };
@@ -40,21 +43,42 @@ export const Hero: React.FC<HeroProps> = ({ config }) => {
     videoEl.addEventListener('loadeddata', playVideo);
     videoEl.addEventListener('canplay', playVideo);
 
-    // Fallback trigger on initial user interaction if browser policy deferred autoplay
+    // Fallback trigger on initial user interaction if autoplay is deferred
     const handleInteraction = () => {
       playVideo();
     };
-    window.addEventListener('click', handleInteraction, { capture: true, once: true });
-    window.addEventListener('touchstart', handleInteraction, { capture: true, once: true });
-    window.addEventListener('pointerdown', handleInteraction, { capture: true, once: true });
+
+    window.addEventListener('click', handleInteraction, {
+      capture: true,
+      once: true,
+    });
+
+    window.addEventListener('touchstart', handleInteraction, {
+      capture: true,
+      once: true,
+    });
+
+    window.addEventListener('pointerdown', handleInteraction, {
+      capture: true,
+      once: true,
+    });
 
     return () => {
       videoEl.removeEventListener('loadedmetadata', playVideo);
       videoEl.removeEventListener('loadeddata', playVideo);
       videoEl.removeEventListener('canplay', playVideo);
-      window.removeEventListener('click', handleInteraction, { capture: true });
-      window.removeEventListener('touchstart', handleInteraction, { capture: true });
-      window.removeEventListener('pointerdown', handleInteraction, { capture: true });
+
+      window.removeEventListener('click', handleInteraction, {
+        capture: true,
+      });
+
+      window.removeEventListener('touchstart', handleInteraction, {
+        capture: true,
+      });
+
+      window.removeEventListener('pointerdown', handleInteraction, {
+        capture: true,
+      });
     };
   }, []);
 
@@ -64,8 +88,8 @@ export const Hero: React.FC<HeroProps> = ({ config }) => {
       <div className="absolute inset-0 z-0 overflow-hidden flex items-center justify-center">
         <video
           ref={videoRef}
-          src="/hero-video.mp4"
-          poster="/hero-poster.jpg"
+          src={config.heroVideoUrl || '/hero-video.mp4'}
+          poster={config.heroImage || '/hero-poster.jpg'}
           autoPlay
           loop
           muted
@@ -74,6 +98,7 @@ export const Hero: React.FC<HeroProps> = ({ config }) => {
           preload="metadata"
           className="w-full h-full object-cover object-center opacity-90 transition-opacity duration-500 pointer-events-none"
         />
+
         {/* Subtle Overlay gradient for contrast */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/40 pointer-events-none" />
       </div>
